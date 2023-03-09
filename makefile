@@ -1,4 +1,3 @@
-# $Id$
 MAJORVERSION=2
 A=.a
 O=.o
@@ -59,6 +58,8 @@ EXAMPLES=	$Bdouble$E \
 		$Bspin$E \
 		$Bsieve$E
 
+EXAMPLES +=     $Bap_fromstr$E
+
 all::		$Blibcii$A $(EXAMPLES) $Bmemchk$O
 
 $Blibcii$A::	$(OBJS) $(EXTRAS)
@@ -115,6 +116,7 @@ $Bcref$O:	examples/cref.c;	$(CC) $(CFLAGS) -c -o $@ examples/cref.c
 $Bsort$O:	examples/sort.c;	$(CC) $(CFLAGS) -c -o $@ examples/sort.c
 $Bspin$O:	examples/spin.c;	$(CC) $(CFLAGS) -c -o $@ examples/spin.c
 $Bsieve$O:	examples/sieve.c;	$(CC) $(CFLAGS) -c -o $@ examples/sieve.c
+$Bap_fromstr$O:	examples/ap_fromstr.c;	$(CC) $(CFLAGS) -c -o $@ examples/ap_fromstr.c
 
 $Bwf$O $Bxref$O $Bgetword$O:	examples/getword.h
 $Bcref$O $Binteger$O:		examples/integer.h
@@ -135,6 +137,7 @@ $Bcref$E:	$Bcref$O $Binteger$O $Blibcii$A;$(LD) $(LDFLAGS) -o $@ $Bcref$O $Binte
 $Bsort$E:	$Bsort$O $Blibcii$A;		$(LD) $(LDFLAGS) -o $@ $Bsort$O $Blibcii$A
 $Bspin$E:	$Bspin$O $Blibcii$A;		$(LD) $(LDFLAGS) -o $@ $Bspin$O $Blibcii$A
 $Bsieve$E:	$Bsieve$O $Blibcii$A;		$(LD) $(LDFLAGS) -o $@ $Bsieve$O $Blibcii$A
+$Bap_fromstr$E:	$Bap_fromstr$O $Blibcii$A;	$(LD) $(LDFLAGS) -o $@ $Bap_fromstr$O $Blibcii$A
 
 maxalign:	$Bmaxalign$E
 		$Bmaxalign$E
