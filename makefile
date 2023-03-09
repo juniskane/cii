@@ -14,7 +14,6 @@ RANLIB=ranlib
 DIFF=diff
 RM=rm -f
 CUSTOM=custom.mk
-EXTRAS=$(BUILDDIR)memcmp$O $(BUILDDIR)memmove$O $(BUILDDIR)strncmp$O
 THREADS=$(BUILDDIR)thread$O $(BUILDDIR)swtch$O $(BUILDDIR)chan$O
 include $(CUSTOM)
 B=$(BUILDDIR)
@@ -62,12 +61,12 @@ EXAMPLES +=     $Bap_fromstr$E
 
 all::		$Blibcii$A $(EXAMPLES) $Bmemchk$O
 
-$Blibcii$A::	$(OBJS) $(EXTRAS)
-		$(AR) $@ $(OBJS) $(EXTRAS); $(RANLIB) $@ || true
+$Blibcii$A::	$(OBJS)
+		$(AR) $@ $(OBJS); $(RANLIB) $@ || true
 
 # Linux-specific rule for building a shared library
-$Blibcii$(SO).$(MAJORVERSION): $(OBJS) $(EXTRAS)
-		$(CC) -shared -Wl,-soname,libcii$(SO).$(MAJORVERSION) -o $@ $(OBJS) $(EXTRAS)
+$Blibcii$(SO).$(MAJORVERSION): $(OBJS)
+		$(CC) -shared -Wl,-soname,libcii$(SO).$(MAJORVERSION) -o $@ $(OBJS)
 
 $Bap$O:		src/ap.c;	$(CC) $(CFLAGS) -c -o $@ src/ap.c
 $Barena$O:	src/arena.c;	$(CC) $(CFLAGS) -c -o $@ src/arena.c
@@ -94,10 +93,6 @@ $Bthread$O:	src/thread.c;	$(CC) $(CFLAGS) -c -o $@ src/thread.c
 $Bthread-nt$O:	src/thread-nt.c;$(CC) $(CFLAGS) -c -o $@ src/thread-nt.c
 $Bxp$O:		src/xp.c;	$(CC) $(CFLAGS) -c -o $@ src/xp.c
 $Bswtch$O:	src/swtch.s;	$(AS) -o $@  src/swtch.s
-
-$Bmemcmp$O:	src/memcmp.c;	$(CC) $(CFLAGS) -c -o $@ src/memcmp.c
-$Bmemmove$O:	src/memmove.c;	$(CC) $(CFLAGS) -c -o $@ src/memmove.c
-$Bstrncmp$O:	src/strncmp.c;	$(CC) $(CFLAGS) -c -o $@ src/strncmp.c
 
 $Bdouble$O:	examples/double.c;	$(CC) $(CFLAGS) -c -o $@ examples/double.c
 $Bcalc$O:	examples/calc.c;	$(CC) $(CFLAGS) -c -o $@ examples/calc.c
