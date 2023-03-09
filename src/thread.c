@@ -2,7 +2,12 @@ static char rcsid[] = "$Id$";
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if linux && __x86_64
+#define __USE_GNU
+#include <signal.h>
+#else
 #include </usr/include/signal.h>
+#endif
 #include <sys/time.h>
 #include "assert.h"
 #include "mem.h"
@@ -96,7 +101,7 @@ static void release(void) {
 	}
 	critical--; } while (0);
 }
-#if linux
+#if linux && i386
 #include <asm/sigcontext.h>
 static int interrupt(int sig, struct sigcontext sc) {
 	if (critical ||
@@ -109,6 +114,26 @@ static int interrupt(int sig, struct sigcontext sc) {
 	critical--; } while (0);
 	run();
 	return 0;
+}
+#elif linux && __x86_64
+#include <ucontext.h>
+static void interrupt(int sig, siginfo_t *info, void *uctx) {
+	ucontext_t *ctx = (ucontext_t *) uctx;
+	sigset_t curset;
+
+	if (critical ||
+	   ctx->uc_mcontext.gregs[REG_RAX] >= (unsigned long)_MONITOR
+	   && ctx->uc_mcontext.gregs[REG_RIP] <= (unsigned long)_ENDMONITOR)
+		return;
+	put(current, &ready);
+	do { critical++;
+	sigprocmask(SIG_SETMASK, NULL, &curset);
+	assert(sigismember(&curset, SIGVTALRM));
+	sigaddset(&curset, SIGVTALRM);
+	sigprocmask(SIG_UNBLOCK, &curset, NULL);
+
+	critical--; } while (0);
+	run();
 }
 #else
 #if __APPLE__
@@ -135,6 +160,16 @@ int Thread_init(int preempt, ...) {
 	current = &root;
 	nthreads = 1;
 	if (preempt) {
+#if linux && __x86_64
+		{
+			struct sigaction sa;
+			sigemptyset(&sa.sa_mask);
+			sa.sa_sigaction = interrupt;
+			sa.sa_flags = SA_SIGINFO;
+			if (sigaction(SIGVTALRM, &sa, NULL) < 0)
+				return 0;
+		}
+#else
 		{
 			struct sigaction sa;
 			memset(&sa, '\0', sizeof sa);
@@ -142,6 +177,7 @@ int Thread_init(int preempt, ...) {
 			if (sigaction(SIGVTALRM, &sa, NULL) < 0)
 				return 0;
 		}
+#endif
 		{
 			struct itimerval it;
 			it.it_value.tv_sec     =  0;
@@ -236,7 +272,7 @@ T Thread_new(int apply(void *), void *args,
 		critical--; } while (0);
 		if (t == NULL)
 			RAISE(Thread_Failed);
-		t->sp = (void *)(((unsigned long)t + stacksize)&~15U);
+		t->sp = (void *)(((unsigned long)t + stacksize)&~15UL);
 	}
 	t->handle = t;
 	if (nbytes > 0) {
@@ -274,12 +310,45 @@ T Thread_new(int apply(void *), void *args,
 	  	t->sp -= 64/4; }
 #elif (linux || __APPLE__) && i386
 	{ extern void _thrstart(void);
+	 /* args
+	  * ----
+	  * ----
+	  * ----   <---
+	  * _thrstart |  16 byte alignment
+	  * bp     ----
+	  * args
+	  * apply
+	  * ----   <--- t->sp
+	  */
+	  /* At this point the stack is aligned on a 16 byte boundary. */
 	  t->sp -= 16/4;	/* keep stack aligned to 16-byte boundaries */
 	  *t->sp = (unsigned long)_thrstart;
 	  t->sp -= 16/4;
 	  t->sp[4/4]  = (unsigned long)apply;
 	  t->sp[8/4]  = (unsigned long)args;
 	  t->sp[12/4] = (unsigned long)t->sp + (4+16)/4; }
+#elif linux && __x86_64
+	{ extern void _thrstart(void);
+	 /* args
+	  * ---- ----  <---
+	  * _thrstart     | 8 byte alignment
+	  * bp         ----
+	  * args
+	  * apply
+	  * ---- ----
+	  * ---- ----
+	  * ---- ----  <--- t->sp
+	  *
+	  * At this point the stack is aligned on a 16 byte boundary.
+	  * Ensure that the return address is aligned on an 8-byte
+	  * (see _thrstart).
+	  */
+	  t->sp -= 8/8;
+	  *t->sp = (unsigned long)_thrstart;
+	  t->sp -= 48/8;
+	  t->sp[24/8] = (unsigned long)apply;
+	  t->sp[32/8] = (unsigned long)args;
+	  t->sp[40/8] = (unsigned long)t->sp + 56/8; }
 #else
 	Unsupported platform
 #endif

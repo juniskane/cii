@@ -178,6 +178,66 @@ _thrstart:
 .globl	_ENDMONITOR
 __ENDMONITOR:
 _ENDMONITOR:
+#elif (linux && __x86_64)
+.align  4
+.globl  _swtch
+_swtch:
+	# At this point rsp will be pointing to the return address.
+	# rsp + 8 bytes will be 16-bit aligned. [SysV-ABI-AMD64 section 3.2.2]
+	# Note that the SVR4 ABI requires %rbp, %rbx, and %r12 through
+	# %r15 to be preserved by the callee. [SysV-ABI-AMD64 section 3.2.1]
+	subq    $48,%rsp
+	movq    %r15,0(%rsp)
+	movq    %r14,8(%rsp)
+	movq    %r13,16(%rsp)
+	movq    %r12,24(%rsp)
+	movq    %rbx,32(%rsp)
+	movq    %rbp,40(%rsp)
+	# rsp + 48 is return address.
+	# rdi is arg1 (thread currently running)
+	# rsi is arg2 (next thread to run)
+	movq    %rsp,0(%rdi)
+	movq    0(%rsi), %rsp
+	# At this point, the context has been switched.
+	# Restore the registers that were pushed above.
+	# Contrived frame from Thread_new
+	# args
+	# ---- ----  <---
+	# _thrstart     | 8 byte alignment
+	# bp         ----       rbp
+	# args                  rbx
+	# apply                 r12
+	# ---- ----             r13
+	# ---- ----             r14
+	# ---- ----  <--- t->sp r15
+	movq    0(%rsp),%r15
+	movq    8(%rsp),%r14
+	movq    16(%rsp),%r13
+	movq    24(%rsp),%r12
+	movq    32(%rsp),%rbx
+	movq    40(%rsp),%rbp
+	# Adjust sp to point to return address.
+	addq    $48,%rsp
+	ret
+.align  4
+.globl  _thrstart
+_thrstart:
+	# rbx is args
+	# r12 is apply
+	# The first argument to a function is passed in rdi
+	movq    %rbx,%rdi
+	# return address in swtch was 8-byte aligned, it was popped off.
+	# The stack pointer is now 16-bit aligned which is required
+	# alignment for a call. [SysV-ABI-AMD64 section 3.2.2]
+	callq   *%r12
+	# The exit code from apply is passed to Thread_exit as the first and
+	# only parameter.
+	movq    %rax,%rdi
+	callq   Thread_exit
+.globl  __ENDMONITOR
+.globl  _ENDMONITOR
+__ENDMONITOR:
+_ENDMONITOR:
 #else
 Unsupported platform
 #endif
