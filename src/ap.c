@@ -347,6 +347,12 @@ T AP_fromstr(const char *str, int base, char **end) {
 			|| 'a' <= *p && *p <= 'z' && *p < 'a' + base - 10
 			|| 'A' <= *p && *p <= 'Z' && *p < 'A' + base - 10); p++)
 			n++;
+		if (n == 0) {
+			z = AP_new(0);
+			if (end)
+				*end = (char *)str;
+			return z;
+		}
 		for (k = 1; (1<<k) < base; k++)
 			;
 		z = mk(((k*n + 7)&~7)/8);
@@ -355,12 +361,9 @@ T AP_fromstr(const char *str, int base, char **end) {
 	carry = XP_fromstr(z->size, z->digits, p,
 		base, &endp);
 	assert(carry == 0);
+	assert(endp != p);
 	normalize(z, z->size);
-	if (endp == p) {
-		endp = (char *)str;
-		z = AP_new(0);
-	} else
-		z->sign = iszero(z) || sign != '-' ? 1 : -1;
+	z->sign = iszero(z) || sign != '-' ? 1 : -1;
 	if (end)
 		*end = (char *)endp;
 	return z;
