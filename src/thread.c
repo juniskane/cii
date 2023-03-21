@@ -119,10 +119,11 @@ static int interrupt(int sig, struct sigcontext sc) {
 static void interrupt(int sig, siginfo_t *info, void *uctx) {
 	ucontext_t *ctx = (ucontext_t *) uctx;
 	sigset_t curset;
+	unsigned long long rip = ctx->uc_mcontext.gregs[REG_RIP];
 
 	if (critical ||
-	   ctx->uc_mcontext.gregs[REG_RAX] >= (unsigned long)_MONITOR
-	   && ctx->uc_mcontext.gregs[REG_RIP] <= (unsigned long)_ENDMONITOR)
+	   rip >= (unsigned long long)_MONITOR
+	&& rip <= (unsigned long long)_ENDMONITOR)
 		return;
 	put(current, &ready);
 	do { critical++;
