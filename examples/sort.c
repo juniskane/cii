@@ -31,7 +31,7 @@ int partition(int a[], int i, int j) {
 	k = i;
 	v = a[k];
 	while (i < j) {
-		i++; while (a[i] < v && i < j) i++;
+		i++; while (i < j && a[i] < v) i++;
 		j--; while (a[j] > v         ) j--;
 		if (i < j) { t = a[i]; a[i] = a[j]; a[j] = t; }
 	}
