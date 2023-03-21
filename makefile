@@ -18,6 +18,9 @@ THREADS=$(BUILDDIR)thread$O $(BUILDDIR)swtch$O $(BUILDDIR)chan$O
 include $(CUSTOM)
 B=$(BUILDDIR)
 
+MEM	?= mem
+MEMOBJ	= $B$(MEM)$O
+
 OBJS=	$Bap$O \
 	$Barena$O \
 	$Barith$O \
@@ -28,7 +31,6 @@ OBJS=	$Bap$O \
 	$Bexcept$O \
 	$Bfmt$O \
 	$Blist$O \
-	$Bmem$O \
 	$Bmp$O \
 	$Bring$O \
 	$Bseq$O \
@@ -38,6 +40,7 @@ OBJS=	$Bap$O \
 	$Btable$O \
 	$Btext$O \
 	$Bxp$O \
+	$(MEMOBJ) \
 	$(THREADS)
 
 EXAMPLES=	$Bdouble$E \
@@ -59,7 +62,7 @@ EXAMPLES=	$Bdouble$E \
 
 EXAMPLES +=     $Bap_fromstr$E
 
-all::		$Blibcii$A $(EXAMPLES) $Bmemchk$O
+all::		$Blibcii$A $(EXAMPLES) $Bmem$O $Bmemchk$O
 
 $Blibcii$A::	$(OBJS)
 		$(AR) $@ $(OBJS); $(RANLIB) $@ || true
