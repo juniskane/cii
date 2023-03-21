@@ -1,5 +1,6 @@
 *.o
 libcii.a
+maxalign
 basename
 calc
 cref

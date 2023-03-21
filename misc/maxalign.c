@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -25,7 +26,9 @@ Incorrect values of MAXALIGN can cause crashes and assertion failures.
 union align {
 	int i;
 	long l;
+	long long ll;
 	long *lp;
+	long long *llp;
 	void *p;
 	void (*fp)(void);
 	float f;
@@ -37,7 +40,9 @@ typedef void (*functp);
 #define yy \
 	xx(int,i);\
 	xx(long,l);\
+	xx(long long,ll);\
 	xx(long *,lp);\
+	xx(long long *,llp);\
 	xx(void *,p);\
 	xx(functp,fp);\
 	xx(float,f);\
@@ -57,13 +62,14 @@ int main(int argc, char *argv[]) {
 	if (argc > 1 && strcmp(argv[1], "-v") == 0)
 		verbose = 1;
 	if (verbose)
-		fprintf(stderr, "sizeof (union align) = %u\n", sizeof (union align));
+		fprintf(stderr, "sizeof (union align) = %lu\n",
+			(unsigned long)sizeof (union align));
 	assert(max);
 
 	char *ptr = malloc(1);
 	if (verbose)
 		fprintf(stderr, "malloc(1) = %p\n", ptr);
-	while (max > 0 && ((unsigned)ptr)%max != 0)
+	while (max > 0 && ((uintptr_t)ptr)%max != 0)
 		max /= 2;
 	assert(max);
 

@@ -93,7 +93,6 @@ $Bstr$O:	src/str.c;	$(CC) $(CFLAGS) -c -o $@ src/str.c
 $Btable$O:	src/table.c;	$(CC) $(CFLAGS) -c -o $@ src/table.c
 $Btext$O:	src/text.c;	$(CC) $(CFLAGS) -c -o $@ src/text.c
 $Bthread$O:	src/thread.c;	$(CC) $(CFLAGS) -c -o $@ src/thread.c
-$Bthread-nt$O:	src/thread-nt.c;$(CC) $(CFLAGS) -c -o $@ src/thread-nt.c
 $Bxp$O:		src/xp.c;	$(CC) $(CFLAGS) -c -o $@ src/xp.c
 $Bswtch$O:	src/swtch.s;	$(AS) -o $@  src/swtch.s
 
@@ -137,8 +136,10 @@ $Bspin$E:	$Bspin$O $Blibcii$A;		$(LD) $(LDFLAGS) -o $@ $Bspin$O $Blibcii$A
 $Bsieve$E:	$Bsieve$O $Blibcii$A;		$(LD) $(LDFLAGS) -o $@ $Bsieve$O $Blibcii$A
 $Bap_fromstr$E:	$Bap_fromstr$O $Blibcii$A;	$(LD) $(LDFLAGS) -o $@ $Bap_fromstr$O $Blibcii$A
 
+ifneq (maxalign,$(strip $Bmaxalign$E))
+.PHONY: maxalign
 maxalign:	$Bmaxalign$E
-		$Bmaxalign$E
+endif
 
 $Bmaxalign$E:	misc/maxalign.c
 		$(CC) -o $@ misc/maxalign.c
@@ -176,5 +177,4 @@ $Bstr$O:	$I/assert.h $I/except.h $I/fmt.h $I/str.h $I/mem.h
 $Btable$O:	$I/mem.h $I/except.h $I/assert.h $I/table.h
 $Btext$O:	$I/assert.h $I/except.h $I/fmt.h $I/text.h $I/mem.h
 $Bthread$O:	$I/assert.h $I/except.h $I/mem.h $I/thread.h $I/sem.h
-$Bthread-nt$O:	$I/assert.h $I/except.h $I/mem.h $I/thread.h $I/sem.h
 $Bxp$O:		$I/assert.h $I/except.h $I/xp.h
