@@ -116,10 +116,17 @@ void *Mem_alloc(long nbytes, const char *file, int line){
 		}
 		if (bp == &freelist) {
 			struct descriptor *newptr;
-			if ((ptr = malloc(nbytes + NALLOC)) == NULL
-			||  (newptr = dalloc(ptr, nbytes + NALLOC,
+			if ((ptr = malloc(nbytes + NALLOC)) == NULL)
+				{
+					if (file == NULL)
+						RAISE(Mem_Failed);
+					else
+						Except_raise(&Mem_Failed, file, line);
+				}
+			if ((newptr = dalloc(ptr, nbytes + NALLOC,
 					__FILE__, __LINE__)) == NULL)
 				{
+					free(ptr);
 					if (file == NULL)
 						RAISE(Mem_Failed);
 					else
