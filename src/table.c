@@ -1,4 +1,3 @@
-static char rcsid[] = "$Id$";
 #include <limits.h>
 #include <stddef.h>
 #include "mem.h"

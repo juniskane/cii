@@ -1,4 +1,3 @@
-static const char *rcsid = "$Id$" "\n$Id$";
 #include <stdio.h>
 #include <stdlib.h>
 #include "assert.h"

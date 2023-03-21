@@ -1,4 +1,3 @@
-static const char *rcsid = "$Id$";
 #include <ctype.h>
 #include <limits.h>
 #include <stdlib.h>

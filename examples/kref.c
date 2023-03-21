@@ -17,8 +17,6 @@ right to left.
 #include "seq.h"
 #include "str.h"
 
-static char rcsid[] = "$Id$";
-
 int getword(char *line, int *i, char *first, char *rest) {
 	int j;
 

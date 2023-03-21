@@ -16,8 +16,6 @@ getword picks off the identifiers right-to-left.
 #include "array.h"
 #include "text.h"
 
-static char rcsid[] = "$Id$";
-
 Text_T getword(Text_T *line, Text_T first, Text_T rest) {
 	int i, j;
 

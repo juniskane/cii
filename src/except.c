@@ -1,4 +1,3 @@
-static char rcsid[] = "$Id$" "\n$Id$";
 #include <stdlib.h>
 #include <stdio.h>
 #include "assert.h"
